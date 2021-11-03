@@ -4,7 +4,7 @@ import logging
 from urllib.parse import quote as urlquote
 
 from mkdocs import utils
-
+import pathlib
 
 log = logging.getLogger(__name__)
 
@@ -187,7 +187,13 @@ class File:
             log.debug(f"Skip copying unmodified file: '{self.src_path}'")
         else:
             log.debug(f"Copying media file: '{self.src_path}'")
-            utils.copy_file(self.abs_src_path, self.abs_dest_path)
+
+            p=pathlib.Path(self.abs_dest_path)
+            if str(p.suffix) in ['.pdf','.PDF','.pptx','.ppt','.zip','.rar','.tar.gz','.tar']:
+                os.makedirs(p.parent,exist_ok=True)
+                os.symlink(self.abs_src_path,p)
+            else:
+                utils.copy_file(self.abs_src_path, self.abs_dest_path)
 
     def is_modified(self):
         if os.path.isfile(self.abs_dest_path):
